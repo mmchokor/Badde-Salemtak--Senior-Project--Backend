@@ -1,7 +1,13 @@
 const express = require('express')
+const dotenv = require('dotenv').config()
+const connectDB = require('./config/db')
+require('colors')
 
 const app = express()
-const PORT = 6969
+const PORT = process.env.PORT || 6969
+
+// connect to db
+connectDB()
 
 app.listen(PORT, (error) => {
    if (!error)
