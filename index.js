@@ -1,18 +1,18 @@
-const express = require('express')
 const dotenv = require('dotenv').config()
 const connectDB = require('./config/db')
 require('colors')
 
-const app = express()
-const PORT = process.env.PORT || 6969
+const app = require('./app');
 
 // connect to db
 connectDB()
 
-app.listen(PORT, (error) => {
+// Running the server
+const PORT = process.env.PORT || 6969
+const server = app.listen(PORT, (error) => {
    if (!error)
       console.log(
-         'Server is Successfully Running, and App is listening on port ' + PORT
+         'Badde Salemtak Server is Successfully Running, the server is listening on port: ' + PORT
       )
    else console.log("Error occurred, server can't start", error)
-})
+ });
