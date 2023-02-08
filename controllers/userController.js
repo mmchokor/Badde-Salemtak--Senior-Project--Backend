@@ -190,6 +190,65 @@ const resetPassword = asyncHandler(async (req, res, next) => {
 		});
 	}
 });
+// this is a filteredObject in order to prevent the user from changing restricted fields
+
+const filterObj = (obj, ...allowedFields) => {
+	const newObj = {};
+	Object.keys(obj).forEach(el => {
+		if (allowedFields.includes(el)) {
+			newObj[el] = obj[el];
+		}
+	});
+	return newObj;
+};
+
+// this is for all data other than password
+const updateMe = asyncHandler(async (req, res, next) => {
+	if (!req.body.password) {
+		const filtering = filterObj(
+			req.body,
+			"firstname",
+			"lastname",
+			"email",
+			"phone",
+			"country"
+		);
+		const updatedUser = await User.findByIdAndUpdate(req.user.id, filtering, {
+			new: true,
+			runValidators: true,
+		});
+		res.status(200).json({
+			status: "success",
+			data: {
+				user: updatedUser,
+			},
+		});
+	} else {
+		res.status(400);
+		throw new Error("This route is not for password updates");
+	}
+});
+
+//IN the update password we need the user to first add his current password for security reasons
+// then he can add a new password
+
+const updatePassword = asyncHandler(async (req, res, next) => {
+	const user = await User.findById(req.user.id).select("+password");
+	if (await bcrypt.compare(req.body.passwordCurrent, user.password)) {
+		const salt = await bcrypt.genSalt(10);
+		const hashedPassword = await bcrypt.hash(req.body.password, salt);
+		user.password = hashedPassword;
+		await user.save();
+		res.status(200).json({
+			status: "success",
+			data: {
+				user,
+			},
+		});
+	} else {
+		throw new Error("Your current password is wrong!");
+	}
+});
 
 module.exports = {
 	registerUser,
@@ -197,4 +256,6 @@ module.exports = {
 	getUserInfo,
 	forgotPassword,
 	resetPassword,
+	updateMe,
+	updatePassword,
 };
