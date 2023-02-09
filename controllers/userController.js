@@ -1,8 +1,9 @@
 const asyncHandler = require('express-async-handler')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-
+const crypto = require('crypto')
 const User = require('../models/userModel')
+const sendEmail = require('../utils/email')
 
 // @desc    Registera new user
 // @route   /api/users
@@ -91,6 +92,164 @@ const getUserInfo = asyncHandler(async (req, res) => {
    res.status(200).json(user)
 })
 
+// @desc    function that sends a reset token to the user's email
+// @route   /api/users/forgotPassword
+// @access  Private
+const forgotPassword = asyncHandler(async (req, res, next) => {
+   //He should add his email first
+   const user = await User.findOne({ email: req.body.email })
+   //then we should generate him a random reset token for a period of
+   // time to be able to change his password
+   if (user) {
+      const resetToken = user.createPasswordResetToken()
+      // we created .createPasswordResetToken() in the model to use userschema and this in the function
+      await user.save({ validateBeforeSave: false })
+
+      //now we should send it to the user's email
+
+      const resetURL = `http://127.0.0.1:6969/api/users/resetPassword/${resetToken}`
+
+      //the resetPassword is another function implemented under this one
+
+      //now we generate a message for the user to be sent
+      const message = `Forgot your password? Submit a Patch request  with you new password and passwordConfirm to this ${resetURL}.\n If you didn't forgot your password please ignore this email.`
+      try {
+         await sendEmail({
+            email: user.email,
+            subject: 'Your password reset valid for 10 mins only',
+            message,
+         })
+         res.status(200).json({
+            status: 'success',
+            message: 'Token sent to email!',
+         })
+      } catch (err) {
+         // we delete them if any error happened
+         user.passwordResetToken = undefined
+         user.passwordResetExpires = undefined
+         await user.save({ validateBeforeSave: false })
+
+         //Now we send the res message in case of error
+         //Internal error
+         res.status(500).json({
+            status: 'fail',
+            message: 'There was an error sending the email.',
+         })
+      }
+   } else {
+      res.status(404).json({
+         status: 'fail',
+         message: 'There is no user with that email address.',
+      })
+   }
+})
+
+// @desc    function that resets the password
+// @route   /api/users/resetPassword/:token
+// @access  Private
+const resetPassword = asyncHandler(async (req, res, next) => {
+   // ok now we recieve the token already from the req
+   const hashedToken = crypto
+      .createHash('sha256')
+      .update(req.params.token)
+      .digest('hex')
+
+   //after encrypting the token we search for the same hashedtoken saved
+   //in a user in our DB
+   const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: Date.now() },
+   })
+   //if the user was found and time is still less than 10 mins then it will work
+   if (!user) {
+      res.status(400).json({
+         status: 'fail',
+         message: 'Token is invalid or has expired.',
+      })
+   } else {
+      const salt = await bcrypt.genSalt(10)
+      const hashedPassword = await bcrypt.hash(req.body.password, salt)
+      user.password = hashedPassword
+      user.passwordResetToken = undefined
+      user.passwordResetExpires = undefined
+      await user.save()
+
+      this.passwordChangedAt = Date.now() - 1000
+
+      const token = generateToken(user._id)
+
+      res.status(200).json({
+         status: 'success',
+         token,
+         data: {
+            user,
+         },
+      })
+   }
+})
+
+// @desc    Update user info
+// @route   /api/users/updateMe
+// @access  Private
+const updateMe = asyncHandler(async (req, res, next) => {
+   if (!req.body.password) {
+      const filtering = filterObj(
+         req.body,
+         'firstname',
+         'lastname',
+         'email',
+         'phone',
+         'country'
+      )
+      const updatedUser = await User.findByIdAndUpdate(req.user.id, filtering, {
+         new: true,
+         runValidators: true,
+      })
+      res.status(200).json({
+         status: 'success',
+         data: {
+            user: updatedUser,
+         },
+      })
+   } else {
+      res.status(400)
+      throw new Error('This route is not for password updates')
+   }
+})
+
+// @desc    Update user password
+// @route   /api/users/updatePassword
+// @access  Private
+const updatePassword = asyncHandler(async (req, res, next) => {
+   const user = await User.findById(req.user.id).select('+password')
+   if (await bcrypt.compare(req.body.passwordCurrent, user.password)) {
+      const salt = await bcrypt.genSalt(10)
+      const hashedPassword = await bcrypt.hash(req.body.password, salt)
+      user.password = hashedPassword
+      await user.save()
+      res.status(200).json({
+         status: 'success',
+         data: {
+            user,
+         },
+      })
+   } else {
+      throw new Error('Your current password is wrong!')
+   }
+})
+
+// Helper functions
+// this is a filteredObject in order to prevent the user from changing restricted fields
+const filterObj = (obj, ...allowedFields) => {
+   const newObj = {}
+   Object.keys(obj).forEach((el) => {
+      if (allowedFields.includes(el)) {
+         newObj[el] = obj[el]
+      }
+   })
+   return newObj
+}
+
 // Generate token
 const generateToken = (id) => {
    return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -102,4 +261,8 @@ module.exports = {
    registerUser,
    loginUser,
    getUserInfo,
+   forgotPassword,
+   resetPassword,
+   updateMe,
+   updatePassword,
 }
