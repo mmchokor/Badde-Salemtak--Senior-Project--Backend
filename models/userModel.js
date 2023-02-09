@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
-//crypto is a built-in Node module no need to install
 const crypto = require("crypto");
 const validator = require("validator");
-const bcrypt = require("bcrypt");
 
 const userSchema = mongoose.Schema(
 	{
@@ -245,6 +243,7 @@ const userSchema = mongoose.Schema(
 		timestamps: true,
 	}
 );
+
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
 	if (this.passwordChangedAt) {
 		const changedTimestamp = parseInt(
