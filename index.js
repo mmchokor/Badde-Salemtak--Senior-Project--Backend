@@ -17,3 +17,6 @@ const server = app.listen(PORT, error => {
 		);
 	else console.log("Error occurred, server can't start", error);
 });
+
+// Export the Express API for vercel
+module.exports = server;
