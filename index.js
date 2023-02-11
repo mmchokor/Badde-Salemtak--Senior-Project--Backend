@@ -19,4 +19,4 @@ const server = app.listen(PORT, error => {
 });
 
 // Export the Express API for vercel
-module.exports = server;
+module.exports = app;
