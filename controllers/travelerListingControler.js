@@ -1,21 +1,18 @@
 const asyncHandler = require('express-async-handler')
-
+const APIFeatures = require("../utils/apiFeatures");
 const User = require('../models/userModel')
 const TraverlerListing = require('../models/traverlerListingModel')
 
-// @desc    Get traveler listings
+// @desc    Get all traveler listings
 // @route   GET /api/traveler/listing
 // @access  Private
-const getListings = asyncHandler(async (req, res) => {
-   // Get user using the id in the jwt
-   const user = await User.findById(req.user.id)
-
-   if (!user) {
-      res.status(401)
-      throw new Error('User not found')
-   }
-
-   const travelerListings = await TraverlerListing.find({ user: req.user.id })
+const getAllListings = asyncHandler(async (req, res) => {
+   const features = new APIFeatures(TraverlerListing.find(), req.query)
+		.filter()
+		.sort()
+		.limitFields()
+		.paginate();
+	const travelerListings = await features.query;
 
    res.status(200).json(travelerListings)
 })
@@ -159,7 +156,7 @@ const createListing = asyncHandler(async (req, res) => {
 })
 
 module.exports = {
-   getListings,
+   getAllListings,
    getListing,
    createListing,
    deleteListing,

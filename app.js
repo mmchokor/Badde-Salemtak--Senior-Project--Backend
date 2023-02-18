@@ -1,7 +1,11 @@
 const express = require("express");
+const cors = require('cors');
 const { errorHandler } = require("./middlewares/errorMiddleware");
 
 const app = express();
+
+// Enable CORS for all routes
+app.use(cors());
 
 // Welcome message to our API
 app.get("/", (req, res) => {

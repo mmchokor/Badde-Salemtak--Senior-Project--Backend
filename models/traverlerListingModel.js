@@ -31,6 +31,10 @@ const TraverlerListingSchema = new Schema({
       required: true,
       ref: 'User',
    },
+   isFavorite: {
+      type: Boolean,
+      default: false,
+   },
    country: {
       type: String,
       required: [true, 'Please select a country'],

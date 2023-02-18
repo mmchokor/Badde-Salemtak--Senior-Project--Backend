@@ -47,6 +47,10 @@ const ResidentListingSchema = new Schema({
 		required: [true, "Please specify the payment method"],
 		enum: ["Cash", "MoneyTransfer", "BankTransfer"],
 	},
+	isFavorite: {
+		type: Boolean,
+		default: false,
+	},
 	productType: {
 		type: String,
 		required: [true, "Please specify the product type"],

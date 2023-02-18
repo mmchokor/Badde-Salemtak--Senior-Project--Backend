@@ -1,9 +1,11 @@
 const asyncHandler = require("express-async-handler");
-
 const User = require("../models/userModel");
 const ResidentListing = require("../models/residentListingModel");
 const APIFeatures = require("../utils/apiFeatures");
 
+// @desc    Get resident listings
+// @route   GET /api/resident/
+// @access  Private
 const getRListings = asyncHandler(async (req, res) => {
 	const features = new APIFeatures(ResidentListing.find(), req.query)
 		.filter()
@@ -21,6 +23,9 @@ const getRListings = asyncHandler(async (req, res) => {
 	});
 });
 
+// @desc    Get singular resident listings
+// @route   GET /api/resident/:id
+// @access  Private
 const getRListing = asyncHandler(async (req, res) => {
 	const user = await User.findById(req.user.id);
 
@@ -43,6 +48,9 @@ const getRListing = asyncHandler(async (req, res) => {
 	});
 });
 
+// @desc    delete resident listings
+// @route   DELETE /api/resident/:id
+// @access  Private
 const deleteRListing = asyncHandler(async (req, res) => {
 	const user = await User.findById(req.user.id);
 
@@ -67,6 +75,9 @@ const deleteRListing = asyncHandler(async (req, res) => {
 	res.status(200).json({ success: true });
 });
 
+// @desc    update resident listings
+// @route   patch /api/resident/listing
+// @access  Private
 const updateRListing = asyncHandler(async (req, res) => {
 	const user = await User.findById(req.user.id);
 
@@ -96,6 +107,9 @@ const updateRListing = asyncHandler(async (req, res) => {
 	});
 });
 
+// @desc    CREATE resident listing
+// @route   POST /api/resident/
+// @access  Private
 const createRListing = asyncHandler(async (req, res) => {
 	const {
 		name,
