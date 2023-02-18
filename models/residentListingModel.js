@@ -34,6 +34,19 @@ const ResidentListingSchema = new Schema({
 		type: Number,
 		required: [true, "Please specify the approximate weightof the product"],
 	},
+	quantity: {
+		type: Number,
+		required: [true, "Please specify the quantity of the product"],
+	},
+	price: {
+		type: Number,
+		required: [true, "Please enter estimated price"],
+	},
+	paymentMethod: {
+		type: String,
+		required: [true, "Please specify the payment method"],
+		enum: ["Cash", "MoneyTransfer", "BankTransfer"],
+	},
 	productType: {
 		type: String,
 		required: [true, "Please specify the product type"],
@@ -45,11 +58,7 @@ const ResidentListingSchema = new Schema({
 			"Clothes",
 			"Others",
 		],
-	},
-	price: {
-		type: Number,
-		required: [true, "Please enter estimated price"],
-	},
+	}
 });
 
 module.exports = ResidentListing = mongoose.model(

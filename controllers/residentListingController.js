@@ -105,6 +105,8 @@ const createRListing = asyncHandler(async (req, res) => {
 		approximateWeight,
 		productType,
 		price,
+		quantity,
+		paymentMethod,
 	} = req.body;
 	if (
 		!name ||
@@ -113,7 +115,9 @@ const createRListing = asyncHandler(async (req, res) => {
 		!imageCover ||
 		!approximateWeight ||
 		!productType ||
-		!price
+		!price ||
+		!quantity ||
+		!paymentMethod
 	) {
 		res.status(400);
 		throw new Error("Please fill all fields");
@@ -132,6 +136,8 @@ const createRListing = asyncHandler(async (req, res) => {
 		approximateWeight,
 		productType,
 		price,
+		quantity,
+		paymentMethod,
 		user: req.user.id,
 	});
 	res.status(201).json({
