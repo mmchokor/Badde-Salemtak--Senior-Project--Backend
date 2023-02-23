@@ -22,7 +22,8 @@ app.use("/api/traveler", require("./routes/travelerListingRoute"));
 app.use("/api/resident", require("./routes/residentListingRoute"));
 
 app.all("*",(req,res)=>{
-	throw new ExpressError("Page Not Found",404)
+	res.status(404).json({message:"API not found"});
+	throw new Error(`Can't find ${req.originalUrl} on this server!`);
 })
 
 app.use(errorHandler);
