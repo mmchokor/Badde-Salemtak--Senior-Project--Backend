@@ -21,6 +21,10 @@ app.use("/api/users", require("./routes/userRoute"));
 app.use("/api/traveler", require("./routes/travelerListingRoute"));
 app.use("/api/resident", require("./routes/residentListingRoute"));
 
+app.all("*",(req,res)=>{
+	throw new ExpressError("Page Not Found",404)
+})
+
 app.use(errorHandler);
 
 module.exports = app;
