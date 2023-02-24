@@ -1,5 +1,5 @@
 const express = require("express");
-const cors = require('cors');
+const cors = require("cors");
 const { errorHandler } = require("./middlewares/errorMiddleware");
 
 const app = express();
@@ -20,11 +20,12 @@ app.use(express.urlencoded({ extended: false }));
 app.use("/api/users", require("./routes/userRoute"));
 app.use("/api/traveler", require("./routes/travelerListingRoute"));
 app.use("/api/resident", require("./routes/residentListingRoute"));
+app.use("/api/favorite", require("./routes/favoriteRoute"));
 
-app.all("*",(req,res)=>{
-	res.status(404).json({message:"API not found"});
+app.all("*", (req, res) => {
+	res.status(404).json({ message: "API not found" });
 	throw new Error(`Can't find ${req.originalUrl} on this server!`);
-})
+});
 
 app.use(errorHandler);
 
