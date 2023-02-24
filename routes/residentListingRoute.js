@@ -1,4 +1,8 @@
 const express = require("express");
+const multer = require("multer");
+
+const storage = multer.memoryStorage()
+const upload = multer({ storage: storage })
 
 const router = express.Router();
 
@@ -13,7 +17,7 @@ const {
 const { protect } = require("../middlewares/authMiddleware");
 
 // all listings
-router.route("/").get(protect, getRListings).post(protect, createRListing);
+router.route("/").get(protect, getRListings).post(protect, upload.array('images', 5), createRListing);
 
 router
 	.route("/:id")

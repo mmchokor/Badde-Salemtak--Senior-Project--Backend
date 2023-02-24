@@ -21,6 +21,11 @@ app.use("/api/users", require("./routes/userRoute"));
 app.use("/api/traveler", require("./routes/travelerListingRoute"));
 app.use("/api/resident", require("./routes/residentListingRoute"));
 
+app.all("*",(req,res)=>{
+	res.status(404).json({message:"API not found"});
+	throw new Error(`Can't find ${req.originalUrl} on this server!`);
+})
+
 app.use(errorHandler);
 
 module.exports = app;
