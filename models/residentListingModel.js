@@ -16,8 +16,8 @@ const ResidentListingSchema = new Schema({
 	},
 	imageCover: {
 		type: String,
-		required: [true, "A product must have an image"],
 	},
+	images: [String],
 	createdAt: {
 		type: Date,
 		default: Date.now(),
