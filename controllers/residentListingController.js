@@ -9,6 +9,7 @@ const {
    S3Client,
    PutObjectCommand,
    GetObjectCommand,
+   DeleteObjectCommand,
 } = require('@aws-sdk/client-s3')
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner')
 
@@ -88,7 +89,7 @@ const getRListing = asyncHandler(async (req, res) => {
       }
       const command = new GetObjectCommand(getObjectParams)
       const url = await getSignedUrl(s3, command, { expiresIn: 3600 })
-	  signedImagesURL.push(url)
+      signedImagesURL.push(url)
    }
    // then we update the listing images with the signed urls
    residentListing.images = signedImagesURL
@@ -121,6 +122,15 @@ const deleteRListing = asyncHandler(async (req, res) => {
    if (residentListing.user.toString() !== req.user.id) {
       res.status(401)
       throw new Error('Not Authorized')
+   }
+
+   for (const image of residentListing.images) {
+      const deleteParams = {
+         Bucket: bucketName,
+         Key: image,
+      }
+
+      await s3.send(new DeleteObjectCommand(deleteParams))
    }
 
    await residentListing.remove()
