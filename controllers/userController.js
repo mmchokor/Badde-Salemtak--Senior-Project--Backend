@@ -107,7 +107,7 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
 
       //now we should send it to the user's email
 
-      const resetURL = `https://badde-salemtak-api.vercel.app/api/users/resetPassword/${resetToken}`
+      const resetURL = process.env.BACKEND_DOMAIN + `/api/users/resetPassword/${resetToken}`
 
       //the resetPassword is another function implemented under this one
 
