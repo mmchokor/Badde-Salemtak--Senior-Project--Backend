@@ -21,6 +21,7 @@ app.use("/api/users", require("./routes/userRoute"));
 app.use("/api/traveler", require("./routes/travelerListingRoute"));
 app.use("/api/resident", require("./routes/residentListingRoute"));
 app.use("/api/favorite", require("./routes/favoriteRoute"));
+app.use("/api/order", require("./routes/orderRoute"));
 
 app.all("*", (req, res) => {
 	res.status(404).json({ message: "API not found" });
