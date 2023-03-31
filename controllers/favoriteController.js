@@ -59,7 +59,7 @@ const deleteFavorite = asyncHandler(async (req, res) => {
       res.status(401)
       throw new Error('User not found')
    }
-   const favorite = await Favorites.findById(req.params.id)
+   const favorite = await Favorites.findById(req.body.id)
 
    if (!favorite) {
       res.status(404)
