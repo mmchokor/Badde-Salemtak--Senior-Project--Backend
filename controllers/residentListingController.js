@@ -43,14 +43,18 @@ const getRListings = asyncHandler(async (req, res) => {
 
 	// fetching a temporary signed url for each image of each listing
 	for (const listing of residentListings) {
-		const getObjectParams = {
-			Bucket: bucketName,
-			Key: listing.imageCover,
-		};
-		const command = new GetObjectCommand(getObjectParams);
-		const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
-		listing.imageCover = url;
-	}
+		if (listing.imageCover) {
+			const getObjectParams = {
+				Bucket: bucketName,
+				Key: listing.imageCover,
+			};
+			const command = new GetObjectCommand(getObjectParams);
+			const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+			listing.imageCover = url;
+		} else {
+			listing.imageCover = '';
+		}
+	} 
 
 	res.status(200).json({
 		status: "success",
