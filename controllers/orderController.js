@@ -24,13 +24,8 @@ const createOrder = asyncHandler(async (req, res) => {
 	}
 
 	if (!listing || !serviceFee || !deliveryFee || !date) {
-		if (listing && serviceFee && date) {
-			res.status(400);
-			throw new Error("Fill all fields: deliveryFee");
-		} else {
-			res.status(400);
-			throw new Error("Fill all fields not date");
-		}
+		res.status(400);
+		throw new Error("Fill all fields.");
 	}
 
 	const order = await Order.create({
@@ -54,12 +49,14 @@ const createOrder = asyncHandler(async (req, res) => {
 // @access  Private
 
 const getOrdersByListing = asyncHandler(async (req, res) => {
-	const listingOrders = await Order.find({
+	const listingOrders = await Order.findOne({
 		listing: req.params.listingId,
 	}).populate({
-		path: "user",
+		path: "listing",
+		select: "name user",
 	});
-	// populate the user bcz we need to get more info about the traveller
+	console.log(listingOrders.listing.name, listingOrders.listing.user);
+
 	if (!listingOrders) {
 		res.status(404);
 		throw new Error("No order for this listing found");
