@@ -24,6 +24,10 @@ const getNotificationByUser = asyncHandler(async (req, res) => {
 	});
 });
 
+// @desc    delete notification
+// @route   delete /api/notification/:id
+// @access  Private
+
 const deleteNotification = asyncHandler(async (req, res) => {
 	const user = await User.findById(req.user.id);
 
@@ -52,5 +56,3 @@ module.exports = {
 	getNotificationByUser,
 	deleteNotification,
 };
-// getNotificationByUser
-// deleteNotification
