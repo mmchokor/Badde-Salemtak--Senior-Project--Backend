@@ -34,8 +34,11 @@ Start the server
   npm run dev
 ```
 
+<br>
 
 ## API Reference
+
+### **User Route**
 
 #### Register a new User request
 
@@ -87,10 +90,49 @@ Start the server
   PATCH /api/user/updateMyPassword
 ```
 
+<br>
+
+### **Favorite Route**
+
+### Create Favorite Resident Listings
+
+```http
+  POST /api/favorite/
+```
+
+| Parameter   | Type     | Description                           |
+| :---------- | :------- | :------------------------------------ |
+| `user`      | `string` | **Required**. ID of the user.          |
+| `listing`   | `string` | **Required**. ID of the listing.       |
+| `listingType` | `string` | **Required**. Type of the listing.     |
+
+
+### Get Favorite Resident Listings by User
+
+```http
+  GET /api/favorite/users/:userId
+```
+
+| Parameter | Type     | Description                           |
+| :-------- | :------- | :------------------------------------ |
+| `userId`  | `string` | **Required**. ID of the user.          |
+
+
+### Delete Favorite Resident Listing
+
+```http
+  DELETE /api/favorite/:id
+```
+
+| Parameter | Type     | Description                           |
+| :-------- | :------- | :------------------------------------ |
+| `id`      | `string` | **Required**. ID of the favorite.      |
+
+<br>
+
 ## Tech Stack
 
 **Server:** Node, Express
-
 
 ## Demo
 

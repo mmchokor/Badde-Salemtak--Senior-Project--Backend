@@ -7,7 +7,7 @@ const TraverlerListing = require('../models/traverlerListingModel')
 // @route   GET /api/traveler/listing
 // @access  Private
 const getAllListings = asyncHandler(async (req, res) => {
-   const features = new APIFeatures(TraverlerListing.find(), req.query)
+   const features = new APIFeatures(TraverlerListing.find().populate('user', 'firstname lastname _id'), req.query)
 		.filter()
 		.sort()
 		.limitFields()
@@ -29,16 +29,11 @@ const getListing = asyncHandler(async (req, res) => {
       throw new Error('User not found')
    }
 
-   const travelerListing = await TraverlerListing.findById(req.params.id)
+   const travelerListing = await TraverlerListing.findById(req.params.id).populate('user', 'firstname lastname _id')
 
    if (!travelerListing) {
       res.status(404)
       throw new Error('Traveler Listing not found')
-   }
-
-   if (travelerListing.user.toString() !== req.user.id) {
-      res.status(401)
-      throw new Error('Not Authorized')
    }
 
    res.status(200).json(travelerListing)

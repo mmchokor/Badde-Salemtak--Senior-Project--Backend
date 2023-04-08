@@ -34,7 +34,7 @@ const generateFileName = (bytes = 32) =>
 // @route   GET /api/resident/
 // @access  Private
 const getRListings = asyncHandler(async (req, res) => {
-	const features = new APIFeatures(ResidentListing.find(), req.query)
+	const features = new APIFeatures(ResidentListing.find().populate('user', 'firstname lastname _id'), req.query)
 		.filter()
 		.sort()
 		.limitFields()
@@ -65,14 +65,14 @@ const getRListings = asyncHandler(async (req, res) => {
 // @route   GET /api/resident/:id
 // @access  Private
 const getRListing = asyncHandler(async (req, res) => {
-	const user = await User.findById(req.user.id);
+	const user = await User.findById(req.user.id)
 
 	if (!user) {
 		res.status(401);
 		throw new Error("User not found");
 	}
 
-	const residentListing = await ResidentListing.findById(req.params.id);
+	const residentListing = await ResidentListing.findById(req.params.id).populate('user', 'firstname lastname _id');
 
 	if (!residentListing) {
 		res.status(404);
