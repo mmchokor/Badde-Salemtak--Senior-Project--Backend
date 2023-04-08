@@ -16,8 +16,10 @@ const favoritesSchema = new mongoose.Schema({
 		enum: ["residentListing", "traverlerListing"],
 		required: true,
 	},
-	timestamp: { type: Date, default: Date.now },
+	timestamp: { type: Date, default: Date.now() },
 });
+//To prevent any duplicate values in the favorite database
+favoritesSchema.index({ user: 1, listing: 1 }, { unique: true });
 
 const Favorites = mongoose.model("Favorites", favoritesSchema);
 

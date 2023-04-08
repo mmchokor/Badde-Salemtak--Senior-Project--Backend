@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const Order = require("../models/orderModel");
 const ResidentListing = require("../models/residentListingModel");
 const User = require("../models/userModel");
+const Notification = require("../models/notificationModel");
 
 // @desc    create order by user for resident listing
 // @route   post /api/order/
@@ -36,6 +37,20 @@ const createOrder = asyncHandler(async (req, res) => {
 		date,
 		message,
 	});
+
+	const notificationForUser = await ResidentListing.findById(listing).populate(
+		"user"
+	);
+
+	const notification = await Notification.create({
+		user: notificationForUser.user._id,
+		sender: req.user.id,
+		message: `This sender ${req.user.id} has sent you an order for this listing ${listing} `,
+		date: Date.now(),
+		order,
+	});
+	console.log("Notfication should be sent to the Listing owner rn");
+
 	res.status(201).json({
 		status: "success",
 		data: {
@@ -49,13 +64,14 @@ const createOrder = asyncHandler(async (req, res) => {
 // @access  Private
 
 const getOrdersByListing = asyncHandler(async (req, res) => {
-	const listingOrders = await Order.findOne({
+	const listingOrders = await Order.find({
 		listing: req.params.listingId,
 	}).populate({
 		path: "listing",
 		select: "name user",
 	});
-	console.log(listingOrders.listing.name, listingOrders.listing.user);
+
+	//console.log(listingOrders.listing.name, listingOrders.listing.user);
 
 	if (!listingOrders) {
 		res.status(404);

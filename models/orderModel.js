@@ -37,4 +37,10 @@ const OrderSchema = mongoose.Schema(
 // To allow the user to send only 1 order per listing
 OrderSchema.index({ listing: 1, user: 1 }, { unique: true });
 
+// OrderSchema.virtual("listingUser", {
+// 	ref: "User",
+// 	localField: "listing.user",
+// 	foreignField: "_id",
+// });
+
 module.exports = mongoose.model("Orders", OrderSchema);
