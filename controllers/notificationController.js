@@ -2,12 +2,9 @@ const asyncHandler = require("express-async-handler");
 const Notification = require("../models/notificationModel");
 const User = require("../models/userModel");
 
-// const Order = require("../models/orderModel");
-
 // @desc    get notification for user
 // @route   get /api/notification/
 // @access  Private
-
 const getNotificationByUser = asyncHandler(async (req, res) => {
 	const userNotifications = await Notification.find({ user: req.user.id });
 	if (!userNotifications) {
@@ -27,7 +24,6 @@ const getNotificationByUser = asyncHandler(async (req, res) => {
 // @desc    delete notification
 // @route   delete /api/notification/:id
 // @access  Private
-
 const deleteNotification = asyncHandler(async (req, res) => {
 	const user = await User.findById(req.user.id);
 
