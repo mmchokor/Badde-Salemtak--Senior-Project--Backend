@@ -62,7 +62,6 @@ const createOrder = asyncHandler(async (req, res) => {
 // @desc    get orders by resident listings
 // @route   get /api/order/listing/:listingId
 // @access  Private
-
 const getOrdersByListing = asyncHandler(async (req, res) => {
 	const listingOrders = await Order.find({
 		listing: req.params.listingId,
