@@ -45,11 +45,11 @@ const createOrder = asyncHandler(async (req, res) => {
 	const notification = await Notification.create({
 		user: notificationForUser.user._id,
 		sender: req.user.id,
-		message: `This sender ${req.user.id} has sent you an order for this listing ${listing} `,
+		message: `This sender ${req.user.firstname}  ${req.user.lastname} has sent you an order for this listing ${notificationForUser.name} `,
 		date: Date.now(),
 		order,
 	});
-	console.log("Notfication should be sent to the Listing owner rn");
+	console.log("Notfication sent to the listing owner");
 
 	res.status(201).json({
 		status: "success",
