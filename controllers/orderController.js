@@ -45,11 +45,13 @@ const createOrder = asyncHandler(async (req, res) => {
 	const notification = await Notification.create({
 		user: notificationForUser.user._id,
 		sender: req.user.id,
-		message: `This sender ${req.user.id} has sent you an order for this listing ${listing} `,
+		senderName: `${req.user.firstname}  ${req.user.lastname}`,
+		message: `This sender ${req.user.firstname}  ${req.user.lastname} has sent you an order for this listing ${notificationForUser.name} `,
 		date: Date.now(),
+		listingId: listing,
 		order,
 	});
-	console.log("Notfication should be sent to the Listing owner rn");
+	console.log("Notfication sent to the listing owner");
 
 	res.status(201).json({
 		status: "success",
@@ -85,7 +87,34 @@ const getOrdersByListing = asyncHandler(async (req, res) => {
 	});
 });
 
+// @desc    get order by id
+// @route   get /api/order/:orderId
+// @access  Private
+
+const getOrderById = asyncHandler(async (req, res) => {
+	const user = await User.findById(req.user.id);
+
+	if (!user) {
+		res.status(401);
+		throw new Error("User not found");
+	}
+
+	const order = await Order.findById(req.params.orderId);
+
+	if (!order) {
+		res.status(404);
+		throw new Error("Order not found");
+	}
+	res.status(200).json({
+		status: "success",
+		data: {
+			order,
+		},
+	});
+});
+
 module.exports = {
 	createOrder,
 	getOrdersByListing,
+	getOrderById,
 };
