@@ -6,7 +6,10 @@ const User = require("../models/userModel");
 // @route   get /api/notification/
 // @access  Private
 const getNotificationByUser = asyncHandler(async (req, res) => {
-	const userNotifications = await Notification.find({ user: req.user.id });
+	const userNotifications = await Notification.find({ user: req.user.id })
+		.populate({ path: "sender", select: "firstname lastname" })
+		.populate({ path: "order", select: "listing" })
+		.exec();
 	if (!userNotifications) {
 		res.status(404);
 		throw new Error("No Notfications found");
