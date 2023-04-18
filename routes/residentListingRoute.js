@@ -12,6 +12,7 @@ const {
 	createRListing,
 	deleteRListing,
 	updateRListing,
+	getUserRListing
 } = require("../controllers/residentListingController");
 
 const { protect } = require("../middlewares/authMiddleware");
@@ -24,5 +25,7 @@ router
 	.get(protect, getRListing)
 	.delete(protect, deleteRListing)
 	.patch(protect, updateRListing);
+
+router.route("/user/:id").get(protect, getUserRListing)
 
 module.exports = router;

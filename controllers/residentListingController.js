@@ -112,6 +112,51 @@ const getRListing = asyncHandler(async (req, res) => {
    })
 })
 
+// @desc    Get all the listing for a specific user
+// @route   GET /api/resident/user/:id
+// @access  Private
+const getUserRListing = asyncHandler(async (req, res) => {
+   const user = await User.findById(req.user.id)
+
+   if (!user) {
+      res.status(401)
+      throw new Error('User not found')
+   }
+
+   const features = new APIFeatures(
+      ResidentListing.find({ user: req.params.id }).populate('user', 'firstname lastname _id'),
+      req.query
+   )
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate()
+   const residentListings = await features.query
+
+   // fetching a temporary signed url for each image of each listing
+   for (const listing of residentListings) {
+      if (listing.imageCover) {
+         const getObjectParams = {
+            Bucket: bucketName,
+            Key: listing.imageCover,
+         }
+         const command = new GetObjectCommand(getObjectParams)
+         const url = await getSignedUrl(s3, command, { expiresIn: 3600 })
+         listing.imageCover = url
+      } else {
+         listing.imageCover = ''
+      }
+   }
+
+   res.status(200).json({
+      status: 'success',
+      results: residentListings.length,
+      data: {
+         residentListings,
+      },
+   })
+})
+
 // @desc    delete resident listings
 // @route   DELETE /api/resident/:id
 // @access  Private
@@ -266,4 +311,5 @@ module.exports = {
    createRListing,
    deleteRListing,
    updateRListing,
+   getUserRListing,
 }
