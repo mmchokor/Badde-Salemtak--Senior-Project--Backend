@@ -9,7 +9,8 @@ const sendEmail = require('../utils/email')
 // @route   /api/users
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
-   const { firstname, lastname, email, password, phone, country } = req.body
+   const { firstname, lastname, email, password, phone, country, admin } =
+      req.body
 
    // validation
    if (!firstname || !lastname || !email || !password || !phone || !country) {
@@ -37,6 +38,7 @@ const registerUser = asyncHandler(async (req, res) => {
       password: hashedPassword,
       phone,
       country,
+      admin,
    })
 
    if (user) {
@@ -47,6 +49,7 @@ const registerUser = asyncHandler(async (req, res) => {
          email: user.email,
          phone: user.phone,
          country: user.country,
+         admin: user.admin,
          token: generateToken(user._id),
       })
    } else {
@@ -107,7 +110,8 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
 
       //now we should send it to the user's email
 
-      const resetURL = process.env.BACKEND_DOMAIN + `/api/users/resetPassword/${resetToken}`
+      const resetURL =
+         process.env.BACKEND_DOMAIN + `/api/users/resetPassword/${resetToken}`
 
       //the resetPassword is another function implemented under this one
 
@@ -238,6 +242,32 @@ const updatePassword = asyncHandler(async (req, res, next) => {
    }
 })
 
+// @desc    delete user using user id from params
+// @route   /api/users/
+// @access  Private
+const deleteUser = asyncHandler(async (req, res, next) => {
+   const userReq = await User.findById(req.user.id)
+
+   if (!userReq.admin) {
+      res.status(401).send({ message: 'Not admin' })
+   }
+   const { id } = req.params
+
+   try {
+      const user = await User.findById(id)
+
+      if (!user) {
+         return res.status(404).send({ error: 'User not found' })
+      }
+
+      user.remove()
+
+      res.send({ message: 'User deleted successfully' })
+   } catch (error) {
+      res.status(500).send({ error: 'Something went wrong' })
+   }
+})
+
 // Helper functions
 // this is a filteredObject in order to prevent the user from changing restricted fields
 const filterObj = (obj, ...allowedFields) => {
@@ -265,4 +295,5 @@ module.exports = {
    resetPassword,
    updateMe,
    updatePassword,
+   deleteUser,
 }

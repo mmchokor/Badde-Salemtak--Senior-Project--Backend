@@ -1,5 +1,5 @@
 const asyncHandler = require('express-async-handler')
-const APIFeatures = require("../utils/apiFeatures");
+const APIFeatures = require('../utils/apiFeatures')
 const User = require('../models/userModel')
 const TraverlerListing = require('../models/traverlerListingModel')
 
@@ -7,12 +7,15 @@ const TraverlerListing = require('../models/traverlerListingModel')
 // @route   GET /api/traveler/listing
 // @access  Private
 const getAllListings = asyncHandler(async (req, res) => {
-   const features = new APIFeatures(TraverlerListing.find().populate('user', 'firstname lastname _id'), req.query)
-		.filter()
-		.sort()
-		.limitFields()
-		.paginate();
-	const travelerListings = await features.query;
+   const features = new APIFeatures(
+      TraverlerListing.find().populate('user', 'firstname lastname _id'),
+      req.query
+   )
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate()
+   const travelerListings = await features.query
 
    res.status(200).json(travelerListings)
 })
@@ -29,7 +32,9 @@ const getListing = asyncHandler(async (req, res) => {
       throw new Error('User not found')
    }
 
-   const travelerListing = await TraverlerListing.findById(req.params.id).populate('user', 'firstname lastname _id')
+   const travelerListing = await TraverlerListing.findById(
+      req.params.id
+   ).populate('user', 'firstname lastname _id')
 
    if (!travelerListing) {
       res.status(404)
@@ -58,7 +63,7 @@ const deleteListing = asyncHandler(async (req, res) => {
       throw new Error('Traveler listing not found')
    }
 
-   if (travelerListing.user.toString() !== req.user.id) {
+   if (residentListing.user.toString() !== req.user.id && !req.user.admin) {
       res.status(401)
       throw new Error('Not Authorized')
    }
@@ -87,14 +92,14 @@ const updateListing = asyncHandler(async (req, res) => {
       throw new Error('Traveler listing not found')
    }
 
-   if (travelerListing.user.toString() !== req.user.id) {
+   if (residentListing.user.toString() !== req.user.id && !req.user.admin) {
       res.status(401)
       throw new Error('Not Authorized')
    }
 
    const updatedTravelerListing = await TraverlerListing.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      req.body
    )
 
    res.status(200).json(updatedTravelerListing)
@@ -113,7 +118,7 @@ const createListing = asyncHandler(async (req, res) => {
       description,
       country,
       paymentMethod,
-      productType
+      productType,
    } = req.body
 
    if (
