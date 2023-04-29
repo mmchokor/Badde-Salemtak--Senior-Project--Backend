@@ -112,6 +112,8 @@ const createListing = asyncHandler(async (req, res) => {
       residentCity,
       description,
       country,
+      paymentMethod,
+      productType
    } = req.body
 
    if (
@@ -121,11 +123,13 @@ const createListing = asyncHandler(async (req, res) => {
       !ticketNumber ||
       !residentCity ||
       !description ||
-      !country
+      !country ||
+      !paymentMethod ||
+      !productType
    ) {
       res.status(400)
       console.log(req.body)
-      throw new Error('Please add a product and description')
+      throw new Error('Missing Fields')
    }
 
    // Get user using the id in the jwt
@@ -144,6 +148,8 @@ const createListing = asyncHandler(async (req, res) => {
       residentCity,
       description,
       country,
+      paymentMethod,
+      productType,
       user: req.user.id,
    })
 
