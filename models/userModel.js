@@ -24,6 +24,10 @@ const userSchema = mongoose.Schema(
 			required: [true, "Please add an password"],
 			minLength: 8,
 		},
+		createdAt: {
+			type: Date,
+			default: Date.now(),
+		},
 
 		//Incase he forgot the password
 		passwordResetToken: String,
