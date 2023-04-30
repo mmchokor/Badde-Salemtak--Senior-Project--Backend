@@ -23,13 +23,30 @@ const TraverlerListingSchema = new Schema({
       required: [true, 'Please specify where you are staying'],
    },
    description: {
-        type: String,
-        required: [true, 'Please add a description'],
-    },
+      type: String,
+      required: [true, 'Please add a description'],
+   },
    user: {
       type: Schema.Types.ObjectId,
       required: true,
       ref: 'User',
+   },
+   paymentMethod: {
+      type: String,
+      required: [true, 'Please specify the payment method'],
+      enum: ['Cash', 'MoneyTransfer', 'BankTransfer'],
+   },
+   productType: {
+      type: String,
+      required: [true, 'Please specify the product type'],
+      enum: [
+         'Accessories',
+         'Medicine',
+         'Food',
+         'Electronics',
+         'Clothes',
+         'Others',
+      ],
    },
    country: {
       type: String,

@@ -45,20 +45,20 @@ const getRListings = asyncHandler(async (req, res) => {
       .paginate()
    const residentListings = await features.query
 
-   // fetching a temporary signed url for each image of each listing
-   for (const listing of residentListings) {
-      if (listing.imageCover) {
-         const getObjectParams = {
-            Bucket: bucketName,
-            Key: listing.imageCover,
-         }
-         const command = new GetObjectCommand(getObjectParams)
-         const url = await getSignedUrl(s3, command, { expiresIn: 3600 })
-         listing.imageCover = url
-      } else {
-         listing.imageCover = ''
-      }
-   }
+	// fetching a temporary signed url for each image of each listing
+	for (const listing of residentListings) {
+		if (listing.imageCover) {
+			const getObjectParams = {
+				Bucket: bucketName,
+				Key: listing.imageCover,
+			};
+			const command = new GetObjectCommand(getObjectParams);
+			const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+			listing.imageCover = url;
+		} else {
+			listing.imageCover = '';
+		}
+	} 
 
    res.status(200).json({
       status: 'success',
@@ -161,6 +161,8 @@ const getUserRListing = asyncHandler(async (req, res) => {
 // @route   DELETE /api/resident/:id
 // @access  Private
 const deleteRListing = asyncHandler(async (req, res) => {
+   console.log('fetittttttttttttttt')
+   console.log(req.user.id)
    const user = await User.findById(req.user.id)
 
    if (!user) {
@@ -173,8 +175,9 @@ const deleteRListing = asyncHandler(async (req, res) => {
       res.status(404)
       throw new Error('Resident listing not found')
    }
+   console.log(req.user)
 
-   if (residentListing.user.toString() !== req.user.id) {
+   if (residentListing.user.toString() !== req.user.id && !req.user.admin) {
       res.status(401)
       throw new Error('Not Authorized')
    }
@@ -210,7 +213,7 @@ const updateRListing = asyncHandler(async (req, res) => {
       res.status(404)
       throw new Error('Resident Listing not found')
    }
-   if (residentListing.user.toString() !== req.user.id) {
+   if (residentListing.user.toString() !== req.user.id && !req.user.admin) {
       res.status(401)
       throw new Error('Not Authorized')
    }
