@@ -2,6 +2,8 @@ const asyncHandler = require('express-async-handler')
 const APIFeatures = require('../utils/apiFeatures')
 const User = require('../models/userModel')
 const TraverlerListing = require('../models/traverlerListingModel')
+const Order = require('../models/orderModel')
+const Favorite = require('../models/favoriteModel')
 
 // @desc    Get all traveler listings
 // @route   GET /api/traveler/listing
@@ -63,10 +65,16 @@ const deleteListing = asyncHandler(async (req, res) => {
       throw new Error('Traveler listing not found')
    }
 
-   if (residentListing.user.toString() !== req.user.id && !req.user.admin) {
+   if (travelerListing.user.toString() !== req.user.id && !req.user.admin) {
       res.status(401)
       throw new Error('Not Authorized')
    }
+
+   // Delete all entries in the Order scheme with the same residentListing ID
+   await Order.deleteMany({ listing: travelerListing._id })
+
+   // Delete all entries in the Favorite scheme with the same residentListing ID
+   await Favorite.deleteMany({ listing: travelerListing._id })
 
    await travelerListing.remove()
 

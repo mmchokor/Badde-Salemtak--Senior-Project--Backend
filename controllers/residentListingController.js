@@ -1,5 +1,7 @@
 const asyncHandler = require('express-async-handler')
 const User = require('../models/userModel')
+const Order = require('../models/orderModel')
+const Favorite = require('../models/favoriteModel')
 const ResidentListing = require('../models/residentListingModel')
 const APIFeatures = require('../utils/apiFeatures')
 const sharp = require('sharp')
@@ -181,6 +183,12 @@ const deleteRListing = asyncHandler(async (req, res) => {
       res.status(401)
       throw new Error('Not Authorized')
    }
+
+   // Delete all entries in the Order scheme with the same residentListing ID
+   await Order.deleteMany({ listing: residentListing._id })
+
+   // Delete all entries in the Favorite scheme with the same residentListing ID
+   await Favorite.deleteMany({ listing: residentListing._id })
 
    for (const image of residentListing.images) {
       const deleteParams = {
