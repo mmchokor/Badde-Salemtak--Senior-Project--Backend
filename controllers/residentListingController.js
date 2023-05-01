@@ -35,8 +35,6 @@ const generateFileName = (bytes = 32) =>
 // @route   GET /api/resident/
 // @access  Private
 const getRListings = asyncHandler(async (req, res) => {
-   const page = req.query.page || 1
-   const limit = req.query.limit || 100
    const features = new APIFeatures(
       ResidentListing.find().populate('user', 'firstname lastname _id'),
       req.query
@@ -44,7 +42,7 @@ const getRListings = asyncHandler(async (req, res) => {
       .filter()
       .sort()
       .limitFields()
-      .paginate(page, limit)
+      .paginate()
    const residentListings = await features.query
 
    // fetching a temporary signed url for each image of each listing

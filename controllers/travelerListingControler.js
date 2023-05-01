@@ -7,8 +7,6 @@ const TraverlerListing = require('../models/traverlerListingModel')
 // @route   GET /api/traveler/listing
 // @access  Private
 const getAllListings = asyncHandler(async (req, res) => {
-   const page = req.query.page || 1
-   const limit = req.query.limit || 100
    const features = new APIFeatures(
       TraverlerListing.find().populate('user', 'firstname lastname _id'),
       req.query
@@ -16,7 +14,7 @@ const getAllListings = asyncHandler(async (req, res) => {
       .filter()
       .sort()
       .limitFields()
-      .paginate(page, limit)
+      .paginate()
    const travelerListings = await features.query
 
    res.status(200).json(travelerListings)

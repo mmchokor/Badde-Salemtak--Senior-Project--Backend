@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler')
 const Favorites = require('../models/favoriteModel')
 const User = require('../models/userModel')
+const APIFeatures = require('../utils/apiFeatures')
 
 // s3 configuration
 const {
@@ -53,15 +54,24 @@ const createFavorite = asyncHandler(async (req, res) => {
 // @route   get /api/favorite/users/:userId
 // @access  Private
 const getFavoritesByUser = asyncHandler(async (req, res) => {
-   const favoriteListings = await Favorites.find({
-      user: req.params.userId,
-   }).populate({
-      path: 'listing',
-      populate: {
-         path: 'user',
-         select: 'firstname lastname _id',
-      },
-   })
+   const features = new APIFeatures(
+      Favorites.find({
+         user: req.params.userId,
+      }).populate({
+         path: 'listing',
+         populate: {
+            path: 'user',
+            select: 'firstname lastname _id',
+         },
+      }),
+      req.query
+   )
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate()
+
+   const favoriteListings = await features.query
 
    if (!favoriteListings) {
       res.status(404)
