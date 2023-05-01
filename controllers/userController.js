@@ -6,6 +6,9 @@ const User = require("../models/userModel");
 const sendEmail = require("../utils/email");
 const residentListing = require("../models/residentListingModel");
 const travelerListing = require("../models/traverlerListingModel");
+const Order = require("../models/orderModel");
+const Notification = require("../models/notificationModel");
+const Favorites = require("../models/favoriteModel");
 
 // @desc    Registera new user
 // @route   /api/users
@@ -285,8 +288,17 @@ const deleteUser = asyncHandler(async (req, res, next) => {
       }
 
 	  // Delete all the listings of the user
+	  const residentListings = await residentListing.find({ user: user._id })
+      const travelerListings = await travelerListing.find({ user: user._id })
+	  for (const userListing of [...residentListings, ...travelerListings]) {
+		await Order.deleteMany({ listing: userListing._id })
+		await Favorites.deleteMany({ listing: userListing._id })
+	 }
 	  await residentListing.deleteMany({ user: user._id })
 	  await travelerListing.deleteMany({ user: user._id })
+	  await Order.deleteMany({ user: user._id })
+	  await Favorites.deleteMany({ user: user._id })
+	  await Notification.deleteMany({ user: user._id })
 
       user.remove()
 
