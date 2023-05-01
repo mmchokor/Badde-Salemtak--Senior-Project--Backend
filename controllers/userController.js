@@ -4,6 +4,8 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const User = require("../models/userModel");
 const sendEmail = require("../utils/email");
+const residentListing = require("../models/residentListingModel");
+const travelerListing = require("../models/traverlerListingModel");
 
 // @desc    Registera new user
 // @route   /api/users
@@ -281,6 +283,10 @@ const deleteUser = asyncHandler(async (req, res, next) => {
       if (!user) {
          return res.status(404).send({ error: 'User not found' })
       }
+
+	  // Delete all the listings of the user
+	  await residentListing.deleteMany({ user: user._id })
+	  await travelerListing.deleteMany({ user: user._id })
 
       user.remove()
 
