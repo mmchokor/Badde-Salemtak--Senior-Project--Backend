@@ -48,6 +48,10 @@ const TraverlerListingSchema = new Schema({
          'Others',
       ],
    },
+	createdAt: {
+		type: Date,
+		default: Date.now(),
+	},
    country: {
       type: String,
       required: [true, 'Please select a country'],
