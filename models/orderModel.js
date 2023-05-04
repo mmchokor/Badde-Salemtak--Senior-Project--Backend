@@ -28,6 +28,11 @@ const OrderSchema = mongoose.Schema(
 			type: String,
 			maxlength: [300, "The message must be less than 300 characters"],
 		},
+		status: {
+			type: String,
+			enum: ["new", "accepted", "completed"],
+			default: "new",
+		},
 	},
 	{
 		toJSON: { virtuals: true },
