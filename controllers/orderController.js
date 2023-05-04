@@ -130,6 +130,64 @@ const getOrdersByListing = asyncHandler(async (req, res) => {
 	});
 });
 
+// @desc    get accepted orders for user
+// @route   get /api/order/me/resident
+// @access  Private
+
+// this is for the accepted orders screen for the resident living in lebanon to see the orders he just accepted and waiting for it to be delivereed
+const getAcceptedOrdersByUser = asyncHandler(async (req, res) => {
+	const userId = await User.findById(req.user.id);
+
+	const orders = await Order.find({ status: "accepted" })
+		.populate({
+			path: "listing",
+			populate: { path: "user", select: "firstname" },
+		})
+		.exec();
+
+	if (!orders) {
+		res.status(404);
+		throw new Error("Orders not found");
+	}
+
+	const acceptedOrders = orders.filter(
+		order => order.listing.user._id.toString() === userId._id.toString()
+	);
+
+	res.status(200).json({
+		status: "success",
+		results: acceptedOrders.length,
+		data: {
+			acceptedOrders,
+		},
+	});
+});
+
+// @desc    get order by id
+// @route   get /api/order/me/traveller
+// @access  Private
+const getPendingDeliveryForTraveller = asyncHandler(async (req, res) => {
+	const userId = await User.findById(req.user.id);
+	const orders = await Order.find({ user: userId });
+	console.log(orders);
+
+	if (orders.length > 0) {
+		const pendingOrders = orders.filter(order => order.status === "accepted");
+
+		res.status(200).json({
+			status: "success",
+			results: pendingOrders.length,
+			data: {
+				pendingOrders,
+			},
+		});
+	} else {
+		res.status(200).json({
+			status: "success",
+			message: "There are no orders pending to be delivered by you",
+		});
+	}
+});
 // @desc    get order by id
 // @route   get /api/order/:orderId
 // @access  Private
@@ -160,5 +218,7 @@ module.exports = {
 	createOrder,
 	acceptOrder,
 	getOrdersByListing,
+	getAcceptedOrdersByUser,
+	getPendingDeliveryForTraveller,
 	getOrderById,
 };
