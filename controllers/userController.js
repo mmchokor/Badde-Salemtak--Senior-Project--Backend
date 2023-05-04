@@ -4,12 +4,18 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const User = require("../models/userModel");
 const sendEmail = require("../utils/email");
+const residentListing = require("../models/residentListingModel");
+const travelerListing = require("../models/traverlerListingModel");
+const Order = require("../models/orderModel");
+const Notification = require("../models/notificationModel");
+const Favorites = require("../models/favoriteModel");
 
 // @desc    Registera new user
 // @route   /api/users
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
-	const { firstname, lastname, email, password, phone, country } = req.body;
+   const { firstname, lastname, email, password, phone, country, admin } =
+      req.body
 
 	// validation
 	if (!firstname || !lastname || !email || !password || !phone || !country) {
@@ -29,31 +35,33 @@ const registerUser = asyncHandler(async (req, res) => {
 	const salt = await bcrypt.genSalt(10);
 	const hashedPassword = await bcrypt.hash(password, salt);
 
-	// create user
-	const user = await User.create({
-		firstname,
-		lastname,
-		email,
-		password: hashedPassword,
-		phone,
-		country,
-	});
+   // create user
+   const user = await User.create({
+      firstname,
+      lastname,
+      email,
+      password: hashedPassword,
+      phone,
+      country,
+      admin,
+   })
 
-	if (user) {
-		res.status(201).json({
-			_id: user._id,
-			firstname: user.firstname,
-			lastname: user.lastname,
-			email: user.email,
-			phone: user.phone,
-			country: user.country,
-			token: generateToken(user._id),
-		});
-	} else {
-		res.status(400);
-		throw new Error("Invalid User data");
-	}
-});
+   if (user) {
+      res.status(201).json({
+         _id: user._id,
+         firstname: user.firstname,
+         lastname: user.lastname,
+         email: user.email,
+         phone: user.phone,
+         country: user.country,
+         admin: user.admin,
+         token: generateToken(user._id),
+      })
+   } else {
+      res.status(400)
+      throw new Error('Invalid User data')
+   }
+})
 
 // @desc    Login a user
 // @route   /api/users/login
@@ -129,8 +137,8 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
 
 		//now we should send it to the user's email
 
-		const resetURL =
-			process.env.BACKEND_DOMAIN + `/api/users/resetPassword/${resetToken}`;
+      const resetURL =
+         process.env.BACKEND_DOMAIN + `/api/users/resetPassword/${resetToken}`
 
 		//the resetPassword is another function implemented under this one
 
@@ -261,6 +269,45 @@ const updatePassword = asyncHandler(async (req, res, next) => {
 	}
 });
 
+// @desc    delete user using user id from params
+// @route   /api/users/
+// @access  Private
+const deleteUser = asyncHandler(async (req, res, next) => {
+   const userReq = await User.findById(req.user.id)
+
+   if (!userReq.admin) {
+      res.status(401).send({ message: 'Not admin' })
+   }
+   const { id } = req.params
+
+   try {
+      const user = await User.findById(id)
+
+      if (!user) {
+         return res.status(404).send({ error: 'User not found' })
+      }
+
+	  // Delete all the listings of the user
+	  const residentListings = await residentListing.find({ user: user._id })
+      const travelerListings = await travelerListing.find({ user: user._id })
+	  for (const userListing of [...residentListings, ...travelerListings]) {
+		await Order.deleteMany({ listing: userListing._id })
+		await Favorites.deleteMany({ listing: userListing._id })
+	 }
+	  await residentListing.deleteMany({ user: user._id })
+	  await travelerListing.deleteMany({ user: user._id })
+	  await Order.deleteMany({ user: user._id })
+	  await Favorites.deleteMany({ user: user._id })
+	  await Notification.deleteMany({ user: user._id })
+
+      user.remove()
+
+      res.send({ message: 'User deleted successfully' })
+   } catch (error) {
+      res.status(500).send({ error: 'Something went wrong' })
+   }
+})
+
 // Helper functions
 // this is a filteredObject in order to prevent the user from changing restricted fields
 const filterObj = (obj, ...allowedFields) => {
@@ -281,12 +328,13 @@ const generateToken = id => {
 };
 
 module.exports = {
-	registerUser,
-	loginUser,
-	getUserInfo,
-	getUserInfoById,
-	forgotPassword,
-	resetPassword,
-	updateMe,
-	updatePassword,
-};
+   registerUser,
+   loginUser,
+   getUserInfo,
+   forgotPassword,
+   resetPassword,
+   updateMe,
+   updatePassword,
+   deleteUser,
+	 getUserInfoById,
+}

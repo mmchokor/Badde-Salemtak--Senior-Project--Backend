@@ -42,6 +42,10 @@ const userSchema = mongoose.Schema(
 		phone: {
 			type: String,
 		},
+		admin: {
+			type: Boolean,
+			default: false,
+		},
 		country: {
 			type: String,
 			required: [true, "Please add a country"],

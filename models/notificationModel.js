@@ -19,6 +19,10 @@ const NotificationSchema = mongoose.Schema({
 		type: mongoose.Schema.Types.ObjectId,
 		ref: "Orders",
 	},
+	createdAt: {
+		type: Date,
+		default: Date.now(),
+	},
 });
 
 module.exports = mongoose.model("Notifications", NotificationSchema);

@@ -1,5 +1,7 @@
 const asyncHandler = require('express-async-handler')
 const User = require('../models/userModel')
+const Order = require('../models/orderModel')
+const Favorite = require('../models/favoriteModel')
 const ResidentListing = require('../models/residentListingModel')
 const APIFeatures = require('../utils/apiFeatures')
 const sharp = require('sharp')
@@ -161,6 +163,8 @@ const getUserRListing = asyncHandler(async (req, res) => {
 // @route   DELETE /api/resident/:id
 // @access  Private
 const deleteRListing = asyncHandler(async (req, res) => {
+   console.log('fetittttttttttttttt')
+   console.log(req.user.id)
    const user = await User.findById(req.user.id)
 
    if (!user) {
@@ -173,11 +177,18 @@ const deleteRListing = asyncHandler(async (req, res) => {
       res.status(404)
       throw new Error('Resident listing not found')
    }
+   console.log(req.user)
 
-   if (residentListing.user.toString() !== req.user.id) {
+   if (residentListing.user.toString() !== req.user.id && !req.user.admin) {
       res.status(401)
       throw new Error('Not Authorized')
    }
+
+   // Delete all entries in the Order scheme with the same residentListing ID
+   await Order.deleteMany({ listing: residentListing._id })
+
+   // Delete all entries in the Favorite scheme with the same residentListing ID
+   await Favorite.deleteMany({ listing: residentListing._id })
 
    for (const image of residentListing.images) {
       const deleteParams = {
@@ -210,7 +221,7 @@ const updateRListing = asyncHandler(async (req, res) => {
       res.status(404)
       throw new Error('Resident Listing not found')
    }
-   if (residentListing.user.toString() !== req.user.id) {
+   if (residentListing.user.toString() !== req.user.id && !req.user.admin) {
       res.status(401)
       throw new Error('Not Authorized')
    }

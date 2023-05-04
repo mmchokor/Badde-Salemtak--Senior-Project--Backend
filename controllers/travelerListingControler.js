@@ -1,18 +1,23 @@
 const asyncHandler = require('express-async-handler')
-const APIFeatures = require("../utils/apiFeatures");
+const APIFeatures = require('../utils/apiFeatures')
 const User = require('../models/userModel')
 const TraverlerListing = require('../models/traverlerListingModel')
+const Order = require('../models/orderModel')
+const Favorite = require('../models/favoriteModel')
 
 // @desc    Get all traveler listings
 // @route   GET /api/traveler/listing
 // @access  Private
 const getAllListings = asyncHandler(async (req, res) => {
-   const features = new APIFeatures(TraverlerListing.find().populate('user', 'firstname lastname _id'), req.query)
-		.filter()
-		.sort()
-		.limitFields()
-		.paginate();
-	const travelerListings = await features.query;
+   const features = new APIFeatures(
+      TraverlerListing.find().populate('user', 'firstname lastname _id'),
+      req.query
+   )
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate()
+   const travelerListings = await features.query
 
    res.status(200).json(travelerListings)
 })
@@ -29,7 +34,9 @@ const getListing = asyncHandler(async (req, res) => {
       throw new Error('User not found')
    }
 
-   const travelerListing = await TraverlerListing.findById(req.params.id).populate('user', 'firstname lastname _id')
+   const travelerListing = await TraverlerListing.findById(
+      req.params.id
+   ).populate('user', 'firstname lastname _id')
 
    if (!travelerListing) {
       res.status(404)
@@ -58,10 +65,16 @@ const deleteListing = asyncHandler(async (req, res) => {
       throw new Error('Traveler listing not found')
    }
 
-   if (travelerListing.user.toString() !== req.user.id) {
+   if (travelerListing.user.toString() !== req.user.id && !req.user.admin) {
       res.status(401)
       throw new Error('Not Authorized')
    }
+
+   // Delete all entries in the Order scheme with the same residentListing ID
+   await Order.deleteMany({ listing: travelerListing._id })
+
+   // Delete all entries in the Favorite scheme with the same residentListing ID
+   await Favorite.deleteMany({ listing: travelerListing._id })
 
    await travelerListing.remove()
 
@@ -87,14 +100,14 @@ const updateListing = asyncHandler(async (req, res) => {
       throw new Error('Traveler listing not found')
    }
 
-   if (travelerListing.user.toString() !== req.user.id) {
+   if (residentListing.user.toString() !== req.user.id && !req.user.admin) {
       res.status(401)
       throw new Error('Not Authorized')
    }
 
    const updatedTravelerListing = await TraverlerListing.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      req.body
    )
 
    res.status(200).json(updatedTravelerListing)
@@ -112,6 +125,8 @@ const createListing = asyncHandler(async (req, res) => {
       residentCity,
       description,
       country,
+      paymentMethod,
+      productType,
    } = req.body
 
    if (
@@ -121,11 +136,13 @@ const createListing = asyncHandler(async (req, res) => {
       !ticketNumber ||
       !residentCity ||
       !description ||
-      !country
+      !country ||
+      !paymentMethod ||
+      !productType
    ) {
       res.status(400)
       console.log(req.body)
-      throw new Error('Please add a product and description')
+      throw new Error('Missing Fields')
    }
 
    // Get user using the id in the jwt
@@ -144,6 +161,8 @@ const createListing = asyncHandler(async (req, res) => {
       residentCity,
       description,
       country,
+      paymentMethod,
+      productType,
       user: req.user.id,
    })
 
