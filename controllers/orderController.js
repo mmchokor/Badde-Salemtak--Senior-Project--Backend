@@ -60,7 +60,7 @@ const createOrder = asyncHandler(async (req, res) => {
 });
 
 // @desc    accept order sent by  user to the listing owner
-// @route   patch /api/order/:orderId
+// @route   patch /api/order/:orderId/accepted
 // @access  Private
 const acceptOrder = asyncHandler(async (req, res) => {
 	const user = await User.findById(req.user.id);
@@ -93,6 +93,51 @@ const acceptOrder = asyncHandler(async (req, res) => {
 		message: `The resident ${req.user.firstname} ${req.user.lastname} have accepted you offer and payed for the item. Its time for you to deliver it!!!`,
 		date: Date.now(),
 		order: acceptedOrder,
+	});
+	console.log("Notification sent to the Traveller now");
+
+	res.status(200).json({
+		status: "success",
+		data: {
+			notification,
+		},
+	});
+});
+
+// @desc    confirm order delivered by traveller to resident
+// @route   get /api/order/:orderId/delivered
+// @access  Private
+
+const deliveredOrder = asyncHandler(async (req, res) => {
+	const user = await User.findById(req.user.id);
+
+	if (!user) {
+		res.status(401);
+		throw new Error("User not found");
+	}
+
+	const order = await Order.findById(req.params.orderId);
+
+	if (!order) {
+		res.status(404);
+		throw new Error("Order not Found");
+	}
+
+	const OrderDelivered = await Order.findByIdAndUpdate(
+		req.params.orderId,
+		req.body,
+		{
+			new: true,
+			runValidators: true,
+		}
+	);
+
+	const notification = await Notification.create({
+		user: order.user,
+		sender: req.user.id,
+		message: `The resident ${req.user.firstname} ${req.user.lastname} have confirmed the delivery. The money is sent to you!`,
+		date: Date.now(),
+		order: OrderDelivered,
 	});
 	console.log("Notification sent to the Traveller now");
 
@@ -223,6 +268,7 @@ const getOrderById = asyncHandler(async (req, res) => {
 module.exports = {
 	createOrder,
 	acceptOrder,
+	deliveredOrder,
 	getOrdersByListing,
 	getAcceptedOrdersByUser,
 	getPendingDeliveryForTraveller,
