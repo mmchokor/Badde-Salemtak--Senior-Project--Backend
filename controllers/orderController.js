@@ -143,6 +143,7 @@ const getAcceptedOrdersByUser = asyncHandler(async (req, res) => {
 			path: "listing",
 			populate: { path: "user", select: "firstname" },
 		})
+		.populate({ path: "user", select: "firstname lastname" })
 		.exec();
 
 	if (!orders) {
@@ -168,8 +169,13 @@ const getAcceptedOrdersByUser = asyncHandler(async (req, res) => {
 // @access  Private
 const getPendingDeliveryForTraveller = asyncHandler(async (req, res) => {
 	const userId = await User.findById(req.user.id);
-	const orders = await Order.find({ user: userId });
-	console.log(orders);
+	const orders = await Order.find({ user: userId })
+		.populate({
+			path: "listing",
+			populate: { path: "user", select: "firstname" },
+		})
+		// .populate({ path: "user", select: "firstname lastname" })
+		.exec();
 
 	if (orders.length > 0) {
 		const pendingOrders = orders.filter(order => order.status === "accepted");
