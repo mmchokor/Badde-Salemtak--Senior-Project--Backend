@@ -105,7 +105,7 @@ const acceptOrder = asyncHandler(async (req, res) => {
 });
 
 // @desc    confirm order delivered by traveller to resident
-// @route   get /api/order/:orderId/delivered
+// @route   patch /api/order/:orderId/delivered
 // @access  Private
 
 const deliveredOrder = asyncHandler(async (req, res) => {
@@ -239,6 +239,44 @@ const getPendingDeliveryForTraveller = asyncHandler(async (req, res) => {
 		});
 	}
 });
+
+// @desc    get completed orders for users
+// @route   get /api/order/me/completed
+// @access  Private
+
+const getCompletedOrdersForUsers = asyncHandler(async (req, res) => {
+	const userId = await User.findById(req.user.id);
+
+	const orders = await Order.find({ status: "completed" })
+		.populate({
+			path: "listing",
+			populate: { path: "user", select: "firstname" },
+		})
+		.populate({ path: "user", select: "firstname lastname" })
+		.exec();
+
+	if (orders.length > 0) {
+		const completedOrders = orders.filter(
+			order =>
+				order.listing.user._id.toString() === userId._id.toString() ||
+				order.user._id.toString() === userId._id.toString()
+		);
+
+		res.status(200).json({
+			status: "success",
+			results: completedOrders.length,
+			data: {
+				completedOrders,
+			},
+		});
+	} else {
+		res.status(200).json({
+			status: "success",
+			message: "There are no orders completed by you",
+		});
+	}
+});
+
 // @desc    get order by id
 // @route   get /api/order/:orderId
 // @access  Private
@@ -272,5 +310,6 @@ module.exports = {
 	getOrdersByListing,
 	getAcceptedOrdersByUser,
 	getPendingDeliveryForTraveller,
+	getCompletedOrdersForUsers,
 	getOrderById,
 };

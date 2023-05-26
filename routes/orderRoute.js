@@ -15,6 +15,11 @@ router.get(
 	protect,
 	orderController.getPendingDeliveryForTraveller
 );
+router.get(
+	"/me/completed",
+	protect,
+	orderController.getCompletedOrdersForUsers
+);
 router.get("/:orderId", protect, orderController.getOrderById);
 router.get("/listing/:listingId", protect, orderController.getOrdersByListing);
 
