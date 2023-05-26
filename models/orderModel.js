@@ -28,9 +28,10 @@ const OrderSchema = mongoose.Schema(
 			type: String,
 			maxlength: [300, "The message must be less than 300 characters"],
 		},
-		createdAt: {
-			type: Date,
-			default: Date.now(),
+		status: {
+			type: String,
+			enum: ["new", "accepted", "completed"],
+			default: "new",
 		},
 	},
 	{
