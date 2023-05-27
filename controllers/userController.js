@@ -308,6 +308,18 @@ const deleteUser = asyncHandler(async (req, res, next) => {
    }
 })
 
+// @desc    Get all users
+// @route   GET /api/users/getAll
+// @access  Public
+const getAllUsers = asyncHandler(async (req, res) => {
+	const userReq = await User.findById(req.user.id)
+	if (!userReq.admin) {
+		res.status(401).send({ message: 'Not admin' })
+	 }
+	const users = await User.find();
+	res.status(200).json(users);
+ });
+
 // Helper functions
 // this is a filteredObject in order to prevent the user from changing restricted fields
 const filterObj = (obj, ...allowedFields) => {
@@ -336,5 +348,6 @@ module.exports = {
    updateMe,
    updatePassword,
    deleteUser,
-	 getUserInfoById,
+	getUserInfoById,
+	getAllUsers,
 }

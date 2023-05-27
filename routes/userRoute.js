@@ -10,6 +10,7 @@ const {
    updateMe,
    updatePassword,
    deleteUser,
+   getAllUsers,
 } = require('../controllers/userController')
 
 const { protect } = require('../middlewares/authMiddleware')
@@ -24,5 +25,6 @@ router.patch('/resetPassword/:token', resetPassword)
 router.patch('/updateMe', protect, updateMe)
 router.patch('/updateMyPassword', protect, updatePassword)
 router.delete('/deleteUser/:id', protect, deleteUser)
+router.get('/getAll/users', protect, getAllUsers)
 
 module.exports = router
