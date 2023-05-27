@@ -45,7 +45,7 @@ const createOrder = asyncHandler(async (req, res) => {
 	const notification = await Notification.create({
 		user: notificationForUser.user._id,
 		sender: req.user.id,
-		message: `This sender ${req.user.firstname}  ${req.user.lastname} has sent you an order for this listing ${notificationForUser.name} `,
+		message: `This sender ${req.user.firstname} ${req.user.lastname} has sent you an order for this listing ${notificationForUser.name} `,
 		date: Date.now(),
 		order,
 	});
@@ -90,7 +90,7 @@ const acceptOrder = asyncHandler(async (req, res) => {
 	const notification = await Notification.create({
 		user: order.user,
 		sender: req.user.id,
-		message: `The resident ${req.user.firstname} ${req.user.lastname} have accepted you offer and payed for the item. Its time for you to deliver it!!!`,
+		message: `The resident ${req.user.firstname} ${req.user.lastname} has accepted your offer and paid for the item.`,
 		date: Date.now(),
 		order: acceptedOrder,
 	});
@@ -135,7 +135,7 @@ const deliveredOrder = asyncHandler(async (req, res) => {
 	const notification = await Notification.create({
 		user: order.user,
 		sender: req.user.id,
-		message: `The resident ${req.user.firstname} ${req.user.lastname} have confirmed the delivery. The money is sent to you!`,
+		message: `The resident ${req.user.firstname} ${req.user.lastname} has confirmed the delivery. The money is sent to you!`,
 		date: Date.now(),
 		order: OrderDelivered,
 	});
