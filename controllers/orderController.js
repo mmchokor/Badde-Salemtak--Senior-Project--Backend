@@ -254,11 +254,11 @@ const getPendingDeliveryForTraveller = asyncHandler(async (req, res) => {
 	}
 });
 
-// @desc    get completed orders for users
-// @route   get /api/order/me/completed
+// @desc    get completed orders for resident
+// @route   get /api/order/me/completed/resident
 // @access  Private
 
-const getCompletedOrdersForUsers = asyncHandler(async (req, res) => {
+const getCompletedOrders = asyncHandler(async (req, res) => {
 	const userId = await User.findById(req.user.id);
 
 	const orders = await Order.find({ status: "completed" })
@@ -271,9 +271,43 @@ const getCompletedOrdersForUsers = asyncHandler(async (req, res) => {
 
 	if (orders.length > 0) {
 		const completedOrders = orders.filter(
-			order =>
-				order.listing.user._id.toString() === userId._id.toString() ||
-				order.user._id.toString() === userId._id.toString()
+			order => order.listing.user._id.toString() === userId._id.toString()
+		);
+
+		res.status(200).json({
+			status: "success",
+			results: completedOrders.length,
+			data: {
+				completedOrders,
+			},
+		});
+	} else {
+		res.status(200).json({
+			status: "success",
+			message: "There are no orders completed by you",
+		});
+	}
+});
+
+// @desc    get completed deliveries for traveller
+// @route   get /api/order/me/completed/traveller
+// @access  Private
+
+//				order.user._id.toString() === userId._id.toString()
+const getCompletedDeliveries = asyncHandler(async (req, res) => {
+	const userId = await User.findById(req.user.id);
+
+	const orders = await Order.find({ status: "completed" })
+		.populate({
+			path: "listing",
+			populate: { path: "user", select: "firstname" },
+		})
+		.populate({ path: "user", select: "firstname lastname" })
+		.exec();
+
+	if (orders.length > 0) {
+		const completedOrders = orders.filter(
+			order => order.user._id.toString() === userId._id.toString()
 		);
 
 		res.status(200).json({
@@ -324,6 +358,7 @@ module.exports = {
 	getOrdersByListing,
 	getAcceptedOrdersByUser,
 	getPendingDeliveryForTraveller,
-	getCompletedOrdersForUsers,
+	getCompletedOrders,
+	getCompletedDeliveries,
 	getOrderById,
 };
