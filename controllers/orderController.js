@@ -29,34 +29,48 @@ const createOrder = asyncHandler(async (req, res) => {
 		throw new Error("Fill all fields.");
 	}
 
-	const order = await Order.create({
-		listing,
-		user: req.user.id,
-		serviceFee,
-		deliveryFee,
-		date,
-		message,
-	});
+	try {
+		const order = await Order.create({
+			listing,
+			user: req.user.id,
+			serviceFee,
+			deliveryFee,
+			date,
+			message,
+		});
 
-	const notificationForUser = await ResidentListing.findById(listing).populate(
-		"user"
-	);
+		const notificationForUser = await ResidentListing.findById(
+			listing
+		).populate("user");
 
-	const notification = await Notification.create({
-		user: notificationForUser.user._id,
-		sender: req.user.id,
-		message: `This sender ${req.user.firstname}  ${req.user.lastname} has sent you an order for this listing ${notificationForUser.name} `,
-		date: Date.now(),
-		order,
-	});
-	console.log("Notfication sent to the listing owner");
-
-	res.status(201).json({
-		status: "success",
-		data: {
+		const notification = await Notification.create({
+			user: notificationForUser.user._id,
+			sender: req.user.id,
+			message: `This sender ${req.user.firstname} ${req.user.lastname} has sent you an order for this listing ${notificationForUser.name} `,
+			date: Date.now(),
 			order,
-		},
-	});
+		});
+		console.log("Notfication sent to the listing owner");
+
+		res.status(201).json({
+			status: "success",
+			data: {
+				order,
+			},
+		});
+	} catch (error) {
+		if (error.code === 11000) {
+			res.status(400).json({
+				status: "error",
+				message: "You have already sent an order for this listing",
+			});
+		} else {
+			res.status(500).json({
+				status: "error",
+				message: " Failed to create an order.",
+			});
+		}
+	}
 });
 
 // @desc    accept order sent by  user to the listing owner
@@ -90,7 +104,7 @@ const acceptOrder = asyncHandler(async (req, res) => {
 	const notification = await Notification.create({
 		user: order.user,
 		sender: req.user.id,
-		message: `The resident ${req.user.firstname} ${req.user.lastname} have accepted you offer and payed for the item. Its time for you to deliver it!!!`,
+		message: `The resident ${req.user.firstname} ${req.user.lastname} has accepted your offer and paid for the item.`,
 		date: Date.now(),
 		order: acceptedOrder,
 	});
@@ -135,7 +149,7 @@ const deliveredOrder = asyncHandler(async (req, res) => {
 	const notification = await Notification.create({
 		user: order.user,
 		sender: req.user.id,
-		message: `The resident ${req.user.firstname} ${req.user.lastname} have confirmed the delivery. The money is sent to you!`,
+		message: `The resident ${req.user.firstname} ${req.user.lastname} has confirmed the delivery. The money is sent to you!`,
 		date: Date.now(),
 		order: OrderDelivered,
 	});
