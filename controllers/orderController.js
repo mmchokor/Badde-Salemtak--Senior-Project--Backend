@@ -262,24 +262,17 @@ const getCompletedOrders = asyncHandler(async (req, res) => {
 		.populate({ path: "user", select: "firstname lastname" })
 		.exec();
 
-	if (orders.length > 0) {
-		const completedOrders = orders.filter(
-			order => order.listing.user._id.toString() === userId._id.toString()
-		);
+	const completedOrders = orders.filter(
+		order => order.listing.user._id.toString() === userId._id.toString()
+	);
 
-		res.status(200).json({
-			status: "success",
-			results: completedOrders.length,
-			data: {
-				completedOrders,
-			},
-		});
-	} else {
-		res.status(200).json({
-			status: "success",
-			message: "There are no orders completed by you",
-		});
-	}
+	res.status(200).json({
+		status: "success",
+		results: completedOrders.length,
+		data: {
+			completedOrders,
+		},
+	});
 });
 
 // @desc    get completed deliveries for traveller
@@ -298,24 +291,17 @@ const getCompletedDeliveries = asyncHandler(async (req, res) => {
 		.populate({ path: "user", select: "firstname lastname" })
 		.exec();
 
-	if (orders.length > 0) {
-		const completedOrders = orders.filter(
-			order => order.user._id.toString() === userId._id.toString()
-		);
+	const completedOrders = orders.filter(
+		order => order.user._id.toString() === userId._id.toString()
+	);
 
-		res.status(200).json({
-			status: "success",
-			results: completedOrders.length,
-			data: {
-				completedOrders,
-			},
-		});
-	} else {
-		res.status(200).json({
-			status: "success",
-			message: "There are no orders completed by you",
-		});
-	}
+	res.status(200).json({
+		status: "success",
+		results: completedOrders.length,
+		data: {
+			completedOrders,
+		},
+	});
 });
 
 // @desc    get order by id
