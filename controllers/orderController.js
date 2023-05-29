@@ -236,22 +236,15 @@ const getPendingDeliveryForTraveller = asyncHandler(async (req, res) => {
 		// .populate({ path: "user", select: "firstname lastname" })
 		.exec();
 
-	if (orders.length > 0) {
-		const pendingOrders = orders.filter(order => order.status === "accepted");
+	const pendingOrders = orders.filter(order => order.status === "accepted");
 
-		res.status(200).json({
-			status: "success",
-			results: pendingOrders.length,
-			data: {
-				pendingOrders,
-			},
-		});
-	} else {
-		res.status(200).json({
-			status: "success",
-			message: "There are no orders pending to be delivered by you",
-		});
-	}
+	res.status(200).json({
+		status: "success",
+		results: pendingOrders.length,
+		data: {
+			pendingOrders,
+		},
+	});
 });
 
 // @desc    get completed orders for resident
