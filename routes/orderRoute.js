@@ -16,9 +16,14 @@ router.get(
 	orderController.getPendingDeliveryForTraveller
 );
 router.get(
-	"/me/completed",
+	"/me/completed/resident",
 	protect,
-	orderController.getCompletedOrdersForUsers
+	orderController.getCompletedOrders
+);
+router.get(
+	"/me/completed/traveller",
+	protect,
+	orderController.getCompletedDeliveries
 );
 router.get("/:orderId", protect, orderController.getOrderById);
 router.get("/listing/:listingId", protect, orderController.getOrdersByListing);
